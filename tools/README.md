@@ -38,6 +38,35 @@
 `dexdec.py` 之所以存在：受限环境里跑不起 baksmali 之类工具，只能自己实现指令解码。
 如果换成正常环境，直接用 `baksmali` / `smali` 更省事。
 
+## 构建辅助
+
+| 文件 | 作用 |
+|---|---|
+| `build-release.sh` | 完整出包脚本：设定 `OUT_DIR` / 目标变量、绕开 `lunch`、直接调 `soong_ui.bash --make-mode bacon` |
+| `shim/touch` | `touch` 的 python 替代（见下） |
+| `shim/cp` | `cp` 的替代，剥掉 `-p` / `-a` / `--preserve=*` |
+
+### 这两个 shim 是给「受限环境」用的
+
+某些容器/沙箱的 seccomp 策略会拒绝 `utimensat` 携带非 NULL `timespec` 的调用，
+表现是 GNU `touch`、`cp -p`、`install -p` 全部报 `不允许的操作`，
+而 `utimensat(NULL)`（即 python 的 `os.utime(path, None)`）是放行的。
+
+AOSP 构建大量依赖 `touch` 建 stamp 文件、`cp -p` 复制产物，被拒后 make 立刻失败。
+`build-release.sh` 把 `shim/` 前置进 `PATH` 来绕开。
+
+**在正常机器上不要用这两个 shim**——它们会丢掉时间戳语义，增量编译的判定会不准。
+
+### 用法
+
+```bash
+# 正常机器（推荐）：删掉脚本里 PATH / OUT_DIR / GOGC 三行，然后
+./tools/build-release.sh
+JOBS=16 ./tools/build-release.sh     # 指定并发
+```
+
+脚本默认 `TARGET_RELEASE=bp1a`（LineageOS 22.2 / Android 15）。换分支时改这一行。
+
 ## 依赖
 
 - Python 3.8+（无第三方库）

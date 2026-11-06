@@ -1,0 +1,22 @@
+# gta7lite (SM-T225) —— LTE 专属设备节点上下文
+#
+# Lineage 的 file_contexts 里完全没有 MTK CCCI 的 umts_* 节点，它们会落到
+# 通用 u:object_r:device:s0，而 rild 对 device 没有 chr_file 权限，导致：
+#   avc: denied { read write } for name="umts_ipc0"
+#        scontext=u:r:rild:s0 tcontext=u:object_r:device:s0 tclass=chr_file
+# 表现为 rild restarting 死循环、modem 起来后 RIL 仍不可用。
+#
+# 标成 ccci_device：device/mediatek/sepolicy_vndr/basic/non_plat/rild.te 里有
+#   allow rild ccci_device:chr_file rw_file_perms;
+# MTK 原厂本来就把 ccci_umts_ipc0 / ccci_bip / ccci_ccb_meta 等标成该类型。
+#
+# umts_boot0 沿用 radio_device（rild 对该类型同样有完整权限），与线上设备一致。
+#
+# 注意：改完必须重启，restorecon 不会重新解析 file_contexts。
+
+/dev/umts_boot0      u:object_r:radio_device:s0
+/dev/umts_ipc0       u:object_r:ccci_device:s0
+/dev/umts_ipc1       u:object_r:ccci_device:s0
+/dev/umts_csd        u:object_r:ccci_device:s0
+/dev/umts_router     u:object_r:ccci_device:s0
+/dev/drb             u:object_r:ccci_device:s0

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     gta7lite (SM-T225) 设备 overlay
+
+     该机型 ro.sf.lcd_density=213 → 逻辑宽度 800/(213/160) = 601dp，
+     刚好跨过 600dp 断点，计算器会命中 values-sw600dp 这套为 10 寸大平板
+     准备的尺寸（formula_max_textsize=128dip、result_textsize=72dip）。
+     而 CalculatorFormula.getVariableTextSize() 只按宽度放大字号、无高度约束，
+     display 区竖屏只有 123px(92dp) → 文字被垂直裁切。
+
+     这里只覆盖竖屏的值，横屏走 values-land（56dip）不受影响。
+     数值等价于对 ExactCalculator.apk 的 resources.arsc 打补丁。
+-->
+<resources>
+    <!-- 公式行 -->
+    <dimen name="formula_padding_top">16dip</dimen>
+    <dimen name="formula_padding_bottom">8dip</dimen>
+    <dimen name="formula_padding_start">16dip</dimen>
+    <dimen name="formula_padding_end">16dip</dimen>
+    <dimen name="formula_min_textsize">32dip</dimen>
+    <dimen name="formula_max_textsize">48dip</dimen>
+
+    <!-- 结果行 -->
+    <dimen name="result_padding_top">8dip</dimen>
+    <dimen name="result_padding_bottom">16dip</dimen>
+    <dimen name="result_padding_start">16dip</dimen>
+    <dimen name="result_padding_end">16dip</dimen>
+    <dimen name="result_textsize">36dip</dimen>
+</resources>

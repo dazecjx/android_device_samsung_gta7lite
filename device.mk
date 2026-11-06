@@ -31,6 +31,11 @@ PRODUCT_CHARACTERISTICS := tablet
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
+# 资源 overlay
+# 修正计算器竖屏文字被裁切：213dpi 让逻辑宽度正好 601dp，命中 values-sw600dp
+# 的大平板字号（128dip），而 display 区只有 92dp 高。详见 overlay/ 下的说明。
+PRODUCT_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
+
 # Inherit from vendor blobs
 # 注意：这里复用 WiFi 变体的 vendor 仓库，不要改成 vendor/samsung/gta7lite。
 # 原因：gta7lite 目前没有独立 vendor 仓库，那 33 条 blob 全部是 TEE 分区文件

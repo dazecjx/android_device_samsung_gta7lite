@@ -1,0 +1,20 @@
+#!/bin/bash
+# cp 的替代：剥掉 -p / -a / --preserve=* 里与时间戳有关的部分。
+# 本环境 utimensat(非 NULL timespec) 被拒，GNU cp -p 会以 rc=1 退出，
+# 直接导致 make 失败。这里降级为普通副本。
+args=()
+for a in "$@"; do
+  case "$a" in
+    -a|--archive) args+=("-r") ;;
+    --preserve=*|--preserve) ;;
+    -p) ;;
+    -[A-Za-z]*)
+      f="${a//p/}"
+      f="${f//a/}"
+      f="${f//P/}"
+      [ -n "$f" ] && [ "$f" != "-" ] && args+=("$f")
+      ;;
+    *) args+=("$a") ;;
+  esac
+done
+exec /bin/cp "${args[@]}"

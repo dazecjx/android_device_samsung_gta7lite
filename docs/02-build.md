@@ -89,17 +89,20 @@ fastboot flash product product.img
 
 **首次从官方系统迁移必须清 data**：`fastboot -w`，否则 FBE 密钥不匹配，卡开机动画。
 
-## 六、刷完必做的两件事
+## 六、编译前必做：打 common 补丁
 
-1. **改 `/vendor/build.prop` 的两行 RAT 属性**，否则 modem 永远起不来：
-   见 [`03-modem-lte.md`](03-modem-lte.md)。
-2. **补 5 条 `umts_*` 设备 SELinux 标签**，否则 modem 起来了 rild 会死循环：
-   见 [`04-selinux.md`](04-selinux.md)。
+本仓库只有 `device/samsung/gta7lite`。RAT 属性与 radio HAL 版本声明在
+`device/samsung/mt6765-common` 里，**不补的话编出来的包 modem 不会启动**：
 
-这两步目前必须手工做，因为都改的是 `/vendor` 分区里的文件，而不是本仓库编译出的内容。
-**后续方向**：把 RAT 属性写进 `vendor.prop`（`ro.vendor.mtk_ps1_rat` 等如果被
-`/vendor/build.prop` 覆盖则无效，需确认加载顺序），或做一个 vendor 侧的 overlay；
-`file_contexts` 补丁可以放进本仓库 `sepolicy/vendor/` 目录里的 `file_contexts` 文件。
+```bash
+cd device/samsung/mt6765-common
+git apply ../../device/samsung/gta7lite/patches/0001-mt6765-common-lte-fixes.patch
+```
+
+两处 `umts_*` 设备标签则已经在 `sepolicy/vendor/file_contexts` 里，
+`BOARD_VENDOR_SEPOLICY_DIRS` 会自动收进去，无需额外操作。
+
+刷完之后仍需跑两个脚本（网络验证、时间时区），见 `06`、`07`。
 
 ## 七、回滚
 

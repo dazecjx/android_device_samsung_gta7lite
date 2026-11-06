@@ -1,0 +1,42 @@
+diff --git a/manifest_ril.xml b/manifest_ril.xml
+index 8a523b9..0bb0505 100644
+--- a/manifest_ril.xml
++++ b/manifest_ril.xml
+@@ -7,10 +7,16 @@
+         <fqname>@1.2::IRadio/se1</fqname>
+         <fqname>@1.2::IRadio/slot1</fqname>
+         <fqname>@1.2::ISap/slot1</fqname>
+-        <fqname>@1.6::IRadio/em1</fqname>
+-        <fqname>@1.6::IRadio/imsAospSlot1</fqname>
+-        <fqname>@1.6::IRadio/se1</fqname>
+-        <fqname>@1.6::IRadio/slot1</fqname>
++        <!-- gta7lite: 删掉 @1.6::IRadio 的 4 条声明。
++             三星 libsec-ril 最高只注册 1.5，而 RIL.java 的
++             getService(name, getStubIfNeeded=true) 会一直等一个永不出现的 1.6 服务，
++             导致回退链（1.6→1.5→1.4）成为死代码、phone 进程 ANR。
++             不在 manifest 里声明 1.6，getService 会立刻返回空并继续走 1.5。
++             原策略是改 telephony-common.jar 的 dex，重刷即失效，改为在此处根治。 -->
++        <fqname>@1.5::IRadio/em1</fqname>
++        <fqname>@1.5::IRadio/imsAospSlot1</fqname>
++        <fqname>@1.5::IRadio/se1</fqname>
++        <fqname>@1.5::IRadio/slot1</fqname>
+     </hal>
+     <hal format="hidl">
+         <name>android.hardware.radio.config</name>
+diff --git a/vendor_ril.prop b/vendor_ril.prop
+index 074d0e7..247dc45 100644
+--- a/vendor_ril.prop
++++ b/vendor_ril.prop
+@@ -15,8 +15,10 @@ ro.vendor.mtk_c2k_lte_mode=0
+ ro.vendor.mtk_data_config=1
+ ro.vendor.mtk_eccci_c2k=1
+ ro.vendor.mtk_md_world_mode_support=1
+-ro.vendor.mtk_protocol1_rat_config=no
+-ro.vendor.mtk_ps1_rat=no
++# gta7lite: 原值为 no，等于告诉 modem「没有任何可用 RAT」，md1 永远停在 0。
++# 与 T225 原厂 /vendor/build.prop 对齐（Lf=LTE FDD, Lt=LTE TDD, W=WCDMA, G=GSM）。
++ro.vendor.mtk_protocol1_rat_config=Lf/Lt/W/G
++ro.vendor.mtk_ps1_rat=Lf/Lt/W/G
+ ro.vendor.mtk_sim_card_onoff=3
+ ro.vendor.mtk_single_bin_modem_support=1
+ ro.vendor.mtk_world_phone_policy=0

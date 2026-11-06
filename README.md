@@ -63,9 +63,11 @@ Wi-Fi 版 `gta7litewifi` (SM-T220) 派生，并把「有 modem、有 SIM」这�
 ├── extract-files.py
 ├── setup-makefiles.py
 ├── vendor.prop                 # 已移除 wifi-only / noril 两行
-├── sepolicy/vendor/            # LTE 专属 sepolicy 挂载点
+├── sepolicy/vendor/            # LTE 专属 sepolicy 挂载点（含 umts_* 设备标签）
+├── overlay/                    # 资源 overlay（修正计算器竖屏字号）
+├── patches/                    # 需要打到 mt6765-common 的补丁
 ├── docs/                       # 排障与修复记录（见下）
-└── tools/                      # 可重放的修复脚本
+└── tools/                      # 可重放的修复脚本 + 构建辅助
 ```
 
 MT6765 平台的大头 blob（含 `ccci_mdinit`、`volte_*`、`ecc_list` 等）在
@@ -107,14 +109,18 @@ adb sideload out/target/product/gta7lite/lineage-22.2-*-gta7lite.zip
 
 1. **插卡未实测**。modem 协议栈已启动、射频能读到真实 MCC/LAC/CID，但手头没有 SIM 卡，
    通话 / 短信 / 移动数据 / VoLTE 均未验证。
-2. **RAT 属性需手工修正**。仓库代码无法覆盖 `/vendor/build.prop`，刷完必须按
-   [`docs/03-modem-lte.md`](docs/03-modem-lte.md) 改两行，否则 modem 永远 `md1:0`。
-3. **radio HAL 版本 1.6 vs 1.5**。框架要 `@1.6::IRadio`，三星的 `libsec-ril` 最高只注册 1.5，
-   HIDL 回退链因 `getStubIfNeeded=true` 失效。见 [`docs/03-modem-lte.md`](docs/03-modem-lte.md)。
-4. **计算器竖屏文字被裁切**。213dpi 让逻辑宽度正好 601dp，跨过 600dp 断点命中大平板字号。
-   见 [`docs/05-display-fix.md`](docs/05-display-fix.md)。
-5. **国内网络显示"连接受限"、时间时区错乱**。可用脚本一键修：
-   [`docs/06-network.md`](docs/06-network.md)、[`docs/07-time.md`](docs/07-time.md)。
+2. **`mt6765-common` 需要打补丁**。RAT 属性（`ro.vendor.mtk_ps1_rat` 等）和 radio HAL
+   版本声明都在 common 仓库里，不在本仓库。不补的话编出来的包 **modem 不会启动**。
+   见 [`patches/`](patches/README.md)。
+3. **radio HAL 1.6 vs 1.5 的修正尚未在真机验证**。补丁把 manifest 里的 1.6 声明换成 1.5，
+   理论上让框架直接连 1.5、不再卡在永不出现的 1.6 服务上；但这一版是「改在源码里」的
+   新做法，此前验证过的是改 `telephony-common.jar` 的 dex。见
+   [`docs/03-modem-lte.md`](docs/03-modem-lte.md)。
+4. **计算器竖屏文字被裁切**。已用 overlay 固化（`overlay/`），需重编验证。
+   历史背景见 [`docs/05-display-fix.md`](docs/05-display-fix.md)。
+5. **国内网络显示"连接受限"、时间时区错乱**。不编进 ROM（换到境外网络反而更糟），
+   刷完用脚本跑一次：[`docs/06-network.md`](docs/06-network.md)、
+   [`docs/07-time.md`](docs/07-time.md)。
 
 ## 文档索引
 

@@ -20,17 +20,17 @@ adb logcat -b radio | grep -iE "SETUP_DATA_CALL|REGISTRATION|VOICE_CALL"
 `ro.vendor.mtk_ps2_rat`（副卡）当前是 `L/W/G`，不含 `Lf`。单卡无影响；
 若要双卡且副卡需要 LTE，可能要改成 `Lf/Lt/W/G`。
 
-## 需要手工处理的部署项
+## 已从「手工步骤」转为「源码内修复」
 
-这两项改的是 `/vendor` 分区里的文件，设备树编译覆盖不到：
+原本需要在设备上手改的两项，现在都在源码里：
 
-1. `/vendor/build.prop` 两行 RAT（见 `03-modem-lte.md`）；
-2. `/vendor/etc/selinux/vendor_file_contexts` 5 条 `umts_*` 标签（见 `04-selinux.md`）。
+| 项 | 位置 |
+|---|---|
+| RAT 属性 | `patches/0001-mt6765-common-lte-fixes.patch`（改 `vendor_ril.prop`，编译前打） |
+| `umts_*` 设备标签 | 本仓库 `sepolicy/vendor/file_contexts`，编译时自动收进 |
 
-**后续方向**：确认 `ro.vendor.mtk_ps1_rat` 是否会被 `/vendor/build.prop` 覆盖——
-如果 `PRODUCT_VENDOR_PROPERTIES` 生成的 `/vendor/build.prop` 片段能晚于原厂内容加载，
-就可以把这两行搬进 `vendor.prop`，彻底免掉手工步骤。
-`file_contexts` 则可以直接放进本仓库的 `sepolicy/vendor/file_contexts`。
+仍然需要刷完后手工做的只有网络验证与时间时区（`tools/netfix.sh`、`tools/timefix.sh`），
+因为它们本质是「按所处网络环境适配」，不适合写死进 ROM。
 
 ## radio HAL 版本（1.6 vs 1.5）
 

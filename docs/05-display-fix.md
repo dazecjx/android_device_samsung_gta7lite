@@ -131,18 +131,19 @@ adb shell am force-stop com.android.calculator2
   不可用；且计算器未声明 `<overlayable>`，常规 RRO 也覆盖不了。
 - **重新编译 APK**：编译链在本机不可用（见 `01-device-notes.md`）。
 
-## 若要固化进源码树
+## 已固化进源码树
 
-把改后的 `dimens.xml` 放到设备 overlay：
+改后的 `dimens.xml` 放在设备 overlay，编译时自动生效：
 
 ```
 device/samsung/gta7lite/overlay/packages/apps/ExactCalculator/res/values-sw600dp/dimens.xml
 ```
 
-并在 `device.mk` 加：
+`device.mk` 里：
 
 ```make
-PRODUCT_PACKAGE_OVERLAYS += device/samsung/gta7lite/overlay
+PRODUCT_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 ```
 
-（本机未验证编译，因为编译链不可用。理论上这是最干净的修法。）
+这样编出来的包不需要再替换 APK。overlay 只声明这 11 个尺寸，其余资源仍取自
+`packages/apps/ExactCalculator/res/values-sw600dp/dimens.xml` 的原始定义。
