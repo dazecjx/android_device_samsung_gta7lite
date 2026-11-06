@@ -1,0 +1,27 @@
+# 编译产物
+out/
+*.zip
+*.img
+*.tar
+*.md5sum
+
+# 二进制 / 大文件（不进仓库）
+*.apk
+*.jar
+*.so
+*.dex
+*.oat
+*.vdex
+*.bin
+
+# 日志与抓取物
+*.log
+*.txt.bak
+dmesg*.txt
+*-klog.txt
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+*.swp
+.DS_Store

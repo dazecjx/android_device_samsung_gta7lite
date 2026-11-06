@@ -1,0 +1,12 @@
+# gta7lite (SM-T225, LTE) vendor properties
+#
+# ★ 与 WiFi 版（gta7litewifi）的第四个关键差异。
+# 原 WiFi 版下面两行必须删除，否则 LTE 版会：
+#   ro.carrier=wifi-only        → 系统判定为无蜂窝设备，不加载电话 UI
+#   ro.vendor.radio.noril=yes   → 直接禁用 RIL，插卡无信号
+#
+# ro.carrier=wifi-only
+# ro.vendor.radio.noril=yes
+#
+# LTE 相关属性由 device/samsung/mt6765-common/vendor_ril.prop 提供，此处不重复。
+# 后续若需覆盖（如 ro.telephony.default_network），在本文件追加即可。

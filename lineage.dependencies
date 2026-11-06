@@ -1,0 +1,10 @@
+[
+  {
+    "repository": "android_device_samsung_mt6765-common",
+    "target_path": "device/samsung/mt6765-common"
+  },
+  {
+    "repository": "android_kernel_samsung_mt6765",
+    "target_path": "kernel/samsung/mt6765"
+  },
+]
